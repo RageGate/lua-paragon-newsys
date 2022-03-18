@@ -20,6 +20,26 @@ local Paragon = require("paragon")
     Technical Function
 
 ]]--
+
+local function GTP_Creature()
+    Paragon.ServerInformations.creature_informations = {}
+
+    local GetCreature = WorldDBQuery("SELECT * FROM "..Paragon.Config.Database..".paragon_creature")
+    if (not GetCreature) then
+        return false
+    end
+
+    repeat
+        local cId, cExp = GetCreature:GetUInt32(0), GetCreature:GetUInt32(1)
+
+        if (not cExp or cExp < 0) then
+            cExp = Paragon.Config.UniversaleCreatureExp
+        end
+
+        Paragon.ServerInformations.creature_informations[cId] = cExp
+    until not GetCreature:NextRow()
+end
+
 local function GTP_Quest()
     Paragon.ServerInformations.quest_informations = {}
 
