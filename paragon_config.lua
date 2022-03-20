@@ -3,9 +3,40 @@
 --- Created by ithorgrim.
 --- DateTime: 17/03/2022 11:10
 ---
-
 local Paragon = require("paragon")
-    Paragon.Config = { }
+Paragon.Config = { }
+
+--[[
+    TODO : Change comments bellow
+]]--
+--[[-----------------------------------------------------------------------------------------------]]--
+-- Points Per Level
+--
+--    Paragon.Database
+--        Description: The number of points to be given must remain an integer
+--        Important:   The number of points per level can be an integer or a float, it must always be greater than 0
+--        Default:     true
+--
+--        Note: The calculation will be (Paragon Level * Point Per Level)
+--[[-----------------------------------------------------------------------------------------------]]--
+
+    Paragon.Config.Enable = true
+
+--[[
+    TODO : Change comments bellow
+]]--
+--[[-----------------------------------------------------------------------------------------------]]--
+-- Points Per Level
+--
+--    Paragon.Database
+--        Description: The number of points to be given must remain an integer
+--        Important:   The number of points per level can be an integer or a float, it must always be greater than 0
+--        Default:     1 (1 is with Gossip Menu | 2 is with AIO Interface | 3 cé lé de)
+--
+--        Note: The calculation will be (Paragon Level * Point Per Level)
+--[[-----------------------------------------------------------------------------------------------]]--
+
+    Paragon.Config.Type = 1
 
 --[[
     TODO : Change comments bellow
@@ -34,7 +65,7 @@ Paragon.Config.Database = "r1_eluna"
 --        Note: The calculation will be (Paragon Level * Point Per Level)
 --[[-----------------------------------------------------------------------------------------------]]--
 
-Paragon.Config.PointPerLevel = 2
+Paragon.Config.PointPerLevel = 1
 
 --[[-----------------------------------------------------------------------------------------------]]--
 -- Max Level
@@ -73,7 +104,7 @@ Paragon.Config.MaxSpellPoints = 255
     --
     --[[-----------------------------------------------------------------------------------------------]]--
 
-Paragon.Config.QuestGiveExp = false
+    Paragon.Config.QuestGiveExp = false
 
     --[[-----------------------------------------------------------------------------------------------]]--
     -- Max Spell Points
@@ -85,7 +116,7 @@ Paragon.Config.QuestGiveExp = false
     --
     --[[-----------------------------------------------------------------------------------------------]]--
 
-Paragon.Config.MinPlayerLevelQuestGiveExp = 1
+    Paragon.Config.MinPlayerLevelQuestGiveExp = 1
 
     --[[-----------------------------------------------------------------------------------------------]]--
     -- Max Spell Points
@@ -97,7 +128,7 @@ Paragon.Config.MinPlayerLevelQuestGiveExp = 1
     --
     --[[-----------------------------------------------------------------------------------------------]]--
 
-Paragon.Config.UniversaleQuestExp = 500
+    Paragon.Config.UniversaleQuestExp = 500
 
 --[[
     TODO : Change comments bellow
@@ -112,7 +143,7 @@ Paragon.Config.UniversaleQuestExp = 500
     --
     --[[-----------------------------------------------------------------------------------------------]]--
 
-Paragon.Config.CreatureGiveExp = true
+    Paragon.Config.CreatureGiveExp = true
 
     --[[-----------------------------------------------------------------------------------------------]]--
     -- Max Spell Points
@@ -124,7 +155,7 @@ Paragon.Config.CreatureGiveExp = true
     --
     --[[-----------------------------------------------------------------------------------------------]]--
 
-Paragon.Config.MinPlayerLevelCreatureGiveExp = 1
+    Paragon.Config.MinPlayerLevelCreatureGiveExp = 1
 
     --[[-----------------------------------------------------------------------------------------------]]--
     -- Max Spell Points
@@ -136,7 +167,7 @@ Paragon.Config.MinPlayerLevelCreatureGiveExp = 1
     --
     --[[-----------------------------------------------------------------------------------------------]]--
 
-Paragon.Config.UniversaleCreatureExp = 500
+    Paragon.Config.UniversaleCreatureExp = 500
 
     --[[-----------------------------------------------------------------------------------------------]]--
     -- Max Spell Points
@@ -148,4 +179,4 @@ Paragon.Config.UniversaleCreatureExp = 500
     --
     --[[-----------------------------------------------------------------------------------------------]]--
 
-Paragon.Config.PlayerCreatureLevelDifference = 3
+    Paragon.Config.PlayerCreatureLevelDifference = 3
