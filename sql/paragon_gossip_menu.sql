@@ -16,20 +16,27 @@ CREATE DATABASE /*!32312 IF NOT EXISTS*/`r1_eluna` /*!40100 DEFAULT CHARACTER SE
 
 USE `r1_eluna`;
 
-/*Table structure for table `paragon_quest` */
+/*Table structure for table `paragon_gossip_menu` */
 
-DROP TABLE IF EXISTS `paragon_quest`;
+DROP TABLE IF EXISTS `paragon_gossip_menu`;
 
-CREATE TABLE `paragon_quest` (
-  `quest_id` int NOT NULL,
-  `quest_exp` int NOT NULL,
-  PRIMARY KEY (`quest_id`)
+CREATE TABLE `paragon_gossip_menu` (
+  `menu_id` int NOT NULL,
+  `option_menu_id` int NOT NULL,
+  `option_text` varchar(255) NOT NULL,
+  `action_type` int NOT NULL,
+  `action_id` int NOT NULL,
+  `cond_class_id` int NOT NULL,
+  PRIMARY KEY (`menu_id`,`option_menu_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-/*Data for the table `paragon_quest` */
+/*Data for the table `paragon_gossip_menu` */
 
-insert  into `paragon_quest`(`quest_id`,`quest_exp`) values 
-(7,100000);
+insert  into `paragon_gossip_menu`(`menu_id`,`option_menu_id`,`option_text`,`action_type`,`action_id`,`cond_class_id`) values 
+(1,0,'|TInterface\\icons\\inv_potion_161:30:30:-18:0|tForce',0,7464,0),
+(1,1,'Page Suivante',1,2,0),
+(2,0,'Page précédente',1,1,0),
+(2,1,'Réinitisaliser les statistiques',2,1,0);
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;

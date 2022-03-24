@@ -16,20 +16,18 @@ CREATE DATABASE /*!32312 IF NOT EXISTS*/`r1_eluna` /*!40100 DEFAULT CHARACTER SE
 
 USE `r1_eluna`;
 
-/*Table structure for table `paragon_quest` */
+/*Table structure for table `paragon_character` */
 
-DROP TABLE IF EXISTS `paragon_quest`;
+DROP TABLE IF EXISTS `paragon_character`;
 
-CREATE TABLE `paragon_quest` (
-  `quest_id` int NOT NULL,
-  `quest_exp` int NOT NULL,
-  PRIMARY KEY (`quest_id`)
+CREATE TABLE `paragon_character` (
+  `guid` int NOT NULL,
+  `spell_id` int NOT NULL,
+  `spell_points` int NOT NULL,
+  PRIMARY KEY (`guid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-/*Data for the table `paragon_quest` */
-
-insert  into `paragon_quest`(`quest_id`,`quest_exp`) values 
-(7,100000);
+/*Data for the table `paragon_character` */
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
