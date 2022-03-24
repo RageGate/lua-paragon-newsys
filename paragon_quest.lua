@@ -16,8 +16,9 @@ local function GiveQuestExp(eventid, delay, repeats, player)
     for data_key, quest_id in pairs(qData) do
         local pQuest = player:HasQuest(quest_id)
         if (not pQuest) then
-            local qExp = _server.quest_informations[quest_id]
+            local qExp = Paragon.ServerInformations.quest_informations[quest_id]
             paragon:SetExp(qExp)
+            player:SendNotification("Tu as gagné : "..qExp)
         end
     end
 end
@@ -26,7 +27,7 @@ local function OnPlayerGiveExp(event, player, amount, object)
     local pLevel = player:GetLevel()
     if (not object and Paragon.Config.MinPlayerLevelQuestGiveExp >= pLevel) then
         local _temp = {}
-        for quest_id, quest_exp in pairs(_server.quest_informations) do
+        for quest_id, quest_exp in pairs(Paragon.ServerInformations.quest_informations) do
             local pQuest = player:HasQuest(quest_id)
             if (pQuest) then
                 _temp[#_temp + 1] = quest_id

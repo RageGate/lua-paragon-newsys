@@ -12,7 +12,7 @@ end
 RegisterPlayerEvent(3, Paragon.OnPlayerLogin)
 
 function Paragon.OnServerReload(event)
-    for _, player in pairs(GetPlayersInWorld()) do
+    for _, player in ipairs(GetPlayersInWorld()) do
         Paragon.OnPlayerLogin(event, player)
     end
 end

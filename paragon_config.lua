@@ -6,51 +6,39 @@
 local Paragon = require("paragon")
 Paragon.Config = { }
 
---[[
-    TODO : Change comments bellow
-]]--
 --[[-----------------------------------------------------------------------------------------------]]--
--- Points Per Level
+-- Enable
+--
+--    Paragon.Enable
+--        Description: Enables / disables the Paragon system
+--        Important:   If it is true then the Paragon system is active, if it is false the system is disabled.
+--        Default:     true / false
+--
+--[[-----------------------------------------------------------------------------------------------]]--
+
+Paragon.Config.Enable = true
+
+--[[-----------------------------------------------------------------------------------------------]]--
+-- Paragon Type
+--
+--    Paragon.Type
+--        Description: Paragon's system display type
+--        Important:   The type can only be an int, be careful if you choose the AIO interface you must send the patch to your players.
+--        Default:     1 (1 is with Gossip Menu | 2 is with AIO Interface | 3 is with the AIO interface and the Gossip Menu)
+--
+--[[-----------------------------------------------------------------------------------------------]]--
+
+Paragon.Config.Type = 1
+
+--[[-----------------------------------------------------------------------------------------------]]--
+-- Database
 --
 --    Paragon.Database
---        Description: The number of points to be given must remain an integer
---        Important:   The number of points per level can be an integer or a float, it must always be greater than 0
---        Default:     true
+--        Description: This is the name of the database that will hold the Paragon data
+--        Important:   If the database does not exist the script will create it.
+--        Default:     r1_eluna
 --
---        Note: The calculation will be (Paragon Level * Point Per Level)
 --[[-----------------------------------------------------------------------------------------------]]--
-
-    Paragon.Config.Enable = true
-
---[[
-    TODO : Change comments bellow
-]]--
---[[-----------------------------------------------------------------------------------------------]]--
--- Points Per Level
---
---    Paragon.Database
---        Description: The number of points to be given must remain an integer
---        Important:   The number of points per level can be an integer or a float, it must always be greater than 0
---        Default:     1 (1 is with Gossip Menu | 2 is with AIO Interface | 3 cé lé de)
---
---        Note: The calculation will be (Paragon Level * Point Per Level)
---[[-----------------------------------------------------------------------------------------------]]--
-
-    Paragon.Config.Type = 1
-
---[[
-    TODO : Change comments bellow
-]]--
-    --[[-----------------------------------------------------------------------------------------------]]--
-    -- Points Per Level
-    --
-    --    Paragon.Database
-    --        Description: The number of points to be given must remain an integer
-    --        Important:   The number of points per level can be an integer or a float, it must always be greater than 0
-    --        Default:     2
-    --
-    --        Note: The calculation will be (Paragon Level * Point Per Level)
-    --[[-----------------------------------------------------------------------------------------------]]--
 
 Paragon.Config.Database = "r1_eluna"
 
@@ -95,19 +83,19 @@ Paragon.Config.MaxSpellPoints = 255
     TODO : Change comments bellow
 ]]--
     --[[-----------------------------------------------------------------------------------------------]]--
-    -- Max Spell Points
+    -- Quest Give Exp
     --
-    --    Paragon.MaxSpellPoints
+    --    Paragon.QuestGiveExp
     --        Description: The maximum number of points per spell
     --        Important:   The maximum number of points per spell cannot exceed 255
     --        Default:     true (false : Desactivate | true : Active (populate paragon_quest for exp))
     --
     --[[-----------------------------------------------------------------------------------------------]]--
 
-    Paragon.Config.QuestGiveExp = false
+    Paragon.Config.QuestGiveExp = true
 
     --[[-----------------------------------------------------------------------------------------------]]--
-    -- Max Spell Points
+    -- Min Player Level Quest Give Exp
     --
     --    Paragon.MaxSpellPoints
     --        Description: The maximum number of points per spell
@@ -119,7 +107,7 @@ Paragon.Config.MaxSpellPoints = 255
     Paragon.Config.MinPlayerLevelQuestGiveExp = 1
 
     --[[-----------------------------------------------------------------------------------------------]]--
-    -- Max Spell Points
+    -- Universal Quest Exp
     --
     --    Paragon.MaxSpellPoints
     --        Description: The maximum number of points per spell

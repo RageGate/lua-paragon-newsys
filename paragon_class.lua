@@ -7,20 +7,41 @@
 local Object = require("rxi_classic")
 
 local Paragon = require("paragon")
-      Paragon.Class = Object:extend()
+Paragon.Class = Object:extend()
 
-      Paragon.ServerInformations = {
-            quest_informations = {},
-            creature_informations = {},
-            gossip_informations = {},
-            spells_informations = {}
-      }
+Paragon.ServerInformations = {
+    quest_informations = {},
+    creature_informations = {},
+    gossip_informations = {},
+    spells_informations = {},
+
+    locale_informations = {}
+}
 
 --[[
 
     Technical Function
 
 ]]--
+
+local function GTP_Locale()
+    Paragon.ServerInformations.locale_informations = {}
+
+    local GetLocale = WorldDBQuery("SELECT * FROM "..Paragon.Config.Database..".paragon_locale")
+    if (not GetLocale) then
+        return false
+    end
+
+    repeat
+        if ( not Paragon.ServerInformations.locale_informations[ GetLocale:GetString(1) ] ) then
+            Paragon.ServerInformations.locale_informations[ GetLocale:GetString(1) ] = { }
+        end
+
+        Paragon.ServerInformations.locale_informations[ GetLocale:GetString(1) ][ GetLocale:GetUInt32(0) ] = GetLocale:GetString(2)
+    until not GetLocale:NextRow()
+
+    return true
+end
 
 local function GTP_Gossip()
     Paragon.ServerInformations.gossip_informations = {}
@@ -31,7 +52,7 @@ local function GTP_Gossip()
     end
 
     repeat
-        Paragon.ServerInformations.gossip_informations[ #Paragon.ServerInformations.gossip_informations +1 ] = {
+        Paragon.ServerInformations.gossip_informations[ #Paragon.ServerInformations.gossip_informations + 1 ] = {
             menu_id = GetGossip:GetUInt32(0),
             option_menu_id = GetGossip:GetUInt32(1),
             option_text = GetGossip:GetString(2),
@@ -40,6 +61,7 @@ local function GTP_Gossip()
             cond_class_id = GetGossip:GetUInt32(5)
         }
     until not GetGossip:NextRow()
+    return true
 end
 
 local function GTP_Creature()
@@ -51,14 +73,15 @@ local function GTP_Creature()
     end
 
     repeat
-        local cId, cExp = GetCreature:GetUInt32(0), GetCreature:GetUInt32(1)
+        local creature_id, creature_exp = GetCreature:GetUInt32(0), GetCreature:GetUInt32(1)
 
-        if (not cExp or cExp < 0) then
-            cExp = Paragon.Config.UniversaleCreatureExp
+        if (not creature_exp or creature_exp < 0) then
+            creature_exp = Paragon.Config.UniversaleCreatureExp
         end
 
-        Paragon.ServerInformations.creature_informations[cId] = cExp
+        Paragon.ServerInformations.creature_informations[creature_id] = creature_exp
     until not GetCreature:NextRow()
+    return true
 end
 
 local function GTP_Quest()
@@ -70,14 +93,15 @@ local function GTP_Quest()
     end
 
     repeat
-        local qId, qExp = GetQuest:GetUInt32(0), GetQuest:GetUInt32(1)
+        local quest_id, quest_exp = GetQuest:GetUInt32(0), GetQuest:GetUInt32(1)
 
-        if (not qExp or qExp < 0) then
-            qExp = Paragon.Config.UniversaleQuestExp
+        if (not quest_exp or quest_exp < 0) then
+            quest_exp = Paragon.Config.UniversaleQuestExp
         end
 
-        Paragon.ServerInformations.quest_informations[qId] = qExp
+        Paragon.ServerInformations.quest_informations[quest_id] = quest_exp
     until not GetQuest:NextRow()
+    return true
 end
 
 local function GTP_Spell()
@@ -89,17 +113,18 @@ local function GTP_Spell()
     end
 
     repeat
-        local sId, sName, sMinVal, sMaxVal = GetSpell:GetUInt32(0), GetSpell:GetString(1), GetSpell:GetUInt32(2), GetSpell:GetUInt32(3)
-        if (not sName) then sName = tostring(sId) end
-        if (not sMaxVal or sMaxVal > 255 or sMaxVal < 0) then sMaxVal = 255 end
-        if (not sMinVal or sMinVal > 255 or sMinVal < 0) then sMinVal = 0 end
-        if (not sMaxVal or sMaxVal > 255 or sMaxVal < 0 or sMaxVal > Paragon.Config.MaxSpellPoints) then sMaxVal = 255 end
+        local spell_id, spell_name, spell_minval, spell_maxval = GetSpell:GetUInt32(0), GetSpell:GetString(1), GetSpell:GetUInt32(2), GetSpell:GetUInt32(3)
+        if (not spell_name) then spell_name = tostring(spell_id) end
+        if (not spell_minval or spell_minval > 255 or spell_minval < 0) then spell_minval = 0 end
+        if (not spell_maxval or spell_maxval > 255 or spell_maxval < 0 or spell_maxval > Paragon.Config.MaxSpellPoints) then spell_maxval = Paragon.Config.MaxSpellPoints end
 
-        Paragon.ServerInformations.spells_informations[sId] = { spellname = sName, minval = sMinVal, maxval = sMaxVal }
+        Paragon.ServerInformations.spells_informations[spell_id] = { spellname = spell_name, minval = spell_minval, maxval = spell_maxval }
     until not GetSpell:NextRow()
+    return true
 end
 
 local function GTP_GetInformations(event)
+    GTP_Locale()
     GTP_Spell()
 
     if (Paragon.Config.QuestGiveExp) then GTP_Quest() end
@@ -130,23 +155,23 @@ function Paragon.Class:new()
         max_exp = 500
     }
 
-    self.points = 0
+    self.points = self:GetPoints()
 end
 
-function Paragon.Class:Method(method)
+function Paragon.Class:Method(method, player)
     local switch = {
-        [0] = function() return self:GetLevel() end,
-        [2] = function() return self:ResetSpells() end,
-        [3] = function() return self:GetPoints() end,
-        [4] = function() return self:Disable() end,
-        [5] = function() return self:Enable() end
+        [0] = function() self:GetLevel() end,
+        [1] = function() self:ResetSpells() player:SetAllParagonAura() end,
+        [2] = function() self:GetPoints() end,
+        [3] = function() self:Disable() end,
+        [4] = function() self:Enable() end,
     }
 
     return switch[method]() or false
 end
 
 function Paragon.Class:SetSpellPoint(spell, points, add)
-    local sPoints = 0
+    local points_awarded = 0
 
     if (not add) then
         if (points > self.spells[spell].points) then
@@ -156,23 +181,28 @@ function Paragon.Class:SetSpellPoint(spell, points, add)
         if (self.spells[spell].points == Paragon.ServerInformations.spells_informations[spell].minval) then
             return false
         end
+
+        if (self.spells[spell].points + points < Paragon.ServerInformations.spells_informations[spell].minval) then
+            return false
+        end
     else
         if (self:GetPoints() < points) then
             return false
         end
     end
 
-    sPoints = self.spells[spell].points + points
-    if (sPoints <= 0) then
+    points_awarded = self.spells[spell].points + points
+    if (points_awarded < 0) then
         return false
     end
 
-    if (sPoints > Paragon.Config.MaxSpellPoints) then
+    if (points_awarded > Paragon.Config.MaxSpellPoints) then
         return false
     end
 
-    self.spells[spell].points = sPoints
+    self.spells[spell].points = points_awarded
     self:SetPoints()
+
     return true
 end
 
@@ -180,7 +210,7 @@ function Paragon.Class:SetLevel()
     self.informations.exp = 0
 
     self.informations.level = self.informations.level + 1
-    self.informations.max_exp = self.informations.max_exp * self.informations.level
+    self.informations.max_exp = Paragon.Config.UniversaleQuestExp * self.informations.level
 
     self:SetPoints()
     return true
@@ -192,8 +222,9 @@ end
 
 function Paragon.Class:ExpCalc()
     if (self.informations.exp >= self.informations.max_exp) then
+        local new_exp = self.informations.exp - self.informations.max_exp
         self:SetLevel()
-        self:SetExp(self.informations.exp - self.informations.max_exp)
+        self:SetExp(new_exp)
         return true
     end
 end
@@ -211,23 +242,24 @@ function Paragon.Class:ResetSpells()
     for spellId, data in pairs(Paragon.ServerInformations.spells_informations) do
         self.spells[spellId] = { points = data.minval, spell = data.spellname }
     end
+    self:SetPoints()
 end
 
 function Paragon.Class:GetPoints()
-    local tPoints = self.informations.level * Paragon.Config.PointPerLevel
-    local pPoints = 0
+    local total_points = self.informations.level * Paragon.Config.PointPerLevel
+    local points_awarded = 0
 
     for spell, spell_informations in pairs(self.spells) do
-        pPoints = pPoints + (spell_informations.points - Paragon.ServerInformations.spells_informations[spell].minval)
+        points_awarded = points_awarded + (spell_informations.points - Paragon.ServerInformations.spells_informations[spell].minval)
     end
 
-    if (pPoints > tPoints) then
+    if (points_awarded > total_points) then
         self:ResetSpells()
     else
-        tPoints = tPoints - pPoints
+        total_points = total_points - points_awarded
     end
 
-    return tPoints
+    return total_points
 end
 
 function Paragon.Class:Disable()
@@ -236,6 +268,7 @@ function Paragon.Class:Disable()
     end
 
     self.Status = false
+    return true
 end
 
 function Paragon.Class:Enable()
@@ -244,6 +277,7 @@ function Paragon.Class:Enable()
     end
 
     self.Status = true
+    return true
 end
 
 --[[
@@ -257,20 +291,18 @@ function Player:SetParagon()
     local pAccid = self:GetAccountId()
     local paragon = Paragon.Class()
 
-    local GetParagonData = CharDBQuery( "SELECT * FROM "..Paragon.Config.Database..".paragon_character WHERE guid = " ..pGuid)
+    local GetCharacterParagon = CharDBQuery( "SELECT * FROM "..Paragon.Config.Database..".paragon_character WHERE guid = " ..pGuid)
 
-    if (not GetParagonData) then
-        print("This player doesn't have a Paragon Information registered :\nID -> "..pAccid.." GUID -> "..pGuid)
-    else
+    if (GetCharacterParagon) then
         repeat
-            local spell_id, spell_points = GetParagonData:GetUInt32(1), GetParagonData:GetUInt32(2)
+            local spell_id, spell_points = GetCharacterParagon:GetUInt32(1), GetCharacterParagon:GetUInt32(2)
 
             for var, data in pairs(Paragon.ServerInformations.spells_informations) do
                 if (data.spellid == spell_id) then
                     paragon[spell_id].points = spell_points
                 end
             end
-        until not GetParagonData:NextRow()
+        until not GetCharacterParagon:NextRow()
     end
 
     self:SetData("paragon", paragon)
@@ -280,6 +312,7 @@ function Player:SetAllParagonAura()
     local paragon = self:GetData("paragon")
 
     for spell_id, _ in pairs(paragon.spells) do
+        self:RemoveAura(spell_id)
         self:SetParagonAura(spell_id)
     end
 end
@@ -297,4 +330,5 @@ function Player:SetParagonAura(spell_id)
     end
 
     self:GetAura( spell_id ):SetStackAmount( paragon.spells[spell_id].points )
+    return true
 end

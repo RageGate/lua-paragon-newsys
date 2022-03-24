@@ -8,6 +8,24 @@ if (Paragon.Config.Type == 2) then
     return false
 end
 
+local Locale = {
+    [1] = "enUS",
+    [2] = "frFR"
+}
+
+local function GetPlayerLocale(locale)
+    local switch = {
+        [1] = "enUS",
+        [2] = "frFR"
+    }
+
+    if (switch[locale]) then
+        return switch[locale]
+    else
+        return switch[1]
+    end
+end
+
 local function GetFirstPage()
     local min
     for _, gossipData in pairs(Paragon.ServerInformations.gossip_informations) do
@@ -23,11 +41,14 @@ local function GetFirstPage()
 end
 
 local function GetSpecificPage(event, player, object, page)
+    local locale = GetPlayerLocale(player:GetDbcLocale())
+
     player:GossipClearMenu()
+    local paragon = player:GetData("paragon")
     for _, gossipData in pairs(Paragon.ServerInformations.gossip_informations) do
         if (gossipData.menu_id == page) then
             if (gossipData.action_type == 0) then
-                player:GossipMenuAddItem(0, gossipData.option_text, gossipData.action_type, gossipData.action_id, true, "Combien de point souhaitez vous ajouter / supprimer")
+                player:GossipMenuAddItem(0, gossipData.option_text .. "  { |CFF008E33"..paragon.spells[gossipData.action_id].points.."|r / |CFF8E003A"..Paragon.ServerInformations.spells_informations[gossipData.action_id].maxval.."|r }", gossipData.action_type, gossipData.action_id, true, gossipData.option_text.."\n\n"..Paragon.ServerInformations.locale_informations[locale][3])
             else
                 player:GossipMenuAddItem(0, gossipData.option_text, gossipData.action_type, gossipData.action_id)
             end
@@ -37,14 +58,33 @@ end
 
 local function OnGossipHello(event, player, object)
     local page = GetFirstPage()
+    local locale = GetPlayerLocale(player:GetDbcLocale())
+    local paragon = player:GetData("paragon")
+
     GetSpecificPage(event, player, object, page)
 
-    player:GossipSendMenu(1, player, 123)
+    local Text = {
+        Paragon.ServerInformations.locale_informations[locale][4].."\n\n",
+        Paragon.ServerInformations.locale_informations[locale][9].."\n\n",
+        Paragon.ServerInformations.locale_informations[locale][10].."\n",
+        Paragon.ServerInformations.locale_informations[locale][5] .. paragon.informations.level .."\n",
+        Paragon.ServerInformations.locale_informations[locale][6] .. "|CFF8F18D3 " .. paragon.informations.exp .. " / " .. paragon.informations.max_exp .. " |r\n",
+        Paragon.ServerInformations.locale_informations[locale][7] .. "|CFF8F18D3 " .. paragon.points .. " |r\n"
+    }
+
+    local msg = ""
+    for key, text in ipairs(Text) do
+        msg = msg .. text
+    end
+
+    player:GossipSetText(msg)
+    player:GossipSendMenu(0x7FFFFFFF, player, 190000)
 end
 RegisterCreatureGossipEvent(197, 1, OnGossipHello)
 
 local function OnGossipSelect(event, player, object, option_type, option_id, points)
     local paragon = player:GetData("paragon")
+    local locale = GetPlayerLocale(player:GetDbcLocale())
 
     if (option_type == 0) then
         local add = false
@@ -52,22 +92,48 @@ local function OnGossipSelect(event, player, object, option_type, option_id, poi
 
         if (points > 0) then
             add = true
+        else
+            return false
         end
 
         if (paragon:SetSpellPoint(option_id, points, add)) then
-            player:SendNotification("Vos points on bien été attribués")
+            player:SendNotification(Paragon.ServerInformations.locale_informations[locale][1])
             player:SetParagonAura(option_id)
         else
-            player:SendNotification("Pas bon")
+            player:SendNotification(Paragon.ServerInformations.locale_informations[locale][2])
         end
+
+        OnGossipHello(event, player, object)
 
     elseif (option_type == 1) then
         GetSpecificPage(event, player, object, option_id)
-        player:GossipSendMenu(1, player, 123)
+        player:GossipSendMenu(0x7FFFFFFF, player, 190000)
 
     elseif(option_type == 2) then
-        local paragon = player:GetData("paragon")
-        paragon:Method(option_id)
+        player:GetData("paragon"):Method(option_id, player)
+
+        OnGossipHello(event, player, object)
     end
 end
-RegisterPlayerGossipEvent(123, 2, OnGossipSelect)
+RegisterPlayerGossipEvent(190000, 2, OnGossipSelect)
+
+local SMSG_NPC_TEXT_UPDATE = 384
+local MAX_GOSSIP_TEXT_OPTIONS = 8
+
+function Player:GossipSetText(text, textID)
+    local data = CreatePacket(SMSG_NPC_TEXT_UPDATE, 100);
+    data:WriteULong(textID or 0x7FFFFFFF)
+    for i = 1, MAX_GOSSIP_TEXT_OPTIONS do
+        data:WriteFloat(0) -- Probability
+        data:WriteString(text) -- Text
+        data:WriteString(text) -- Text
+        data:WriteULong(0) -- language
+        data:WriteULong(0) -- emote
+        data:WriteULong(0) -- emote
+        data:WriteULong(0) -- emote
+        data:WriteULong(0) -- emote
+        data:WriteULong(0) -- emote
+        data:WriteULong(0) -- emote
+    end
+    self:SendPacket(data)
+end
